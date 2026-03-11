@@ -7,14 +7,14 @@ export async function POST(req: NextRequest) {
 
     if (!apiKey) {
       return NextResponse.json({ 
-        content: [{ text: 'ERROR: No API key configured' }]  // Match expected format
+        content: [{ text: 'ERROR: No API key configured' }] 
       }, { status: 500 })
     }
 
-    // Get the last user message
     const lastMessage = messages[messages.length - 1]
     
-    const model = 'gemini-2.5-flash' // From your working models list
+    // 🚀 FASTEST MODEL: Use Flash-Lite for speed
+    const model = 'gemini-2.5-flash-lite' // Fastest option
     
     const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`
     
@@ -26,8 +26,11 @@ export async function POST(req: NextRequest) {
           parts: [{ text: lastMessage.content }]
         }],
         generationConfig: {
-          maxOutputTokens: 2048,
-          temperature: 1.0,
+          // ⚡ Speed optimizations:
+          maxOutputTokens: 512,  // Reduced from 2048
+          temperature: 0.7,
+          topK: 20,  // Lower = faster, more focused
+          topP: 0.8, // Slightly lower = faster
         },
       }),
     })
@@ -37,25 +40,16 @@ export async function POST(req: NextRequest) {
     if (!response.ok) {
       return NextResponse.json({ 
         content: [{ text: `ERROR: ${data.error?.message || 'Unknown error'}` }]
-      }, { status: response.status })
+      })
     }
 
-    // Extract the text from Gemini's response
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text
 
-    if (!text) {
-      return NextResponse.json({ 
-        content: [{ text: 'ERROR: Empty response from Gemini' }]
-      }, { status: 500 })
-    }
-
-    // ✅ CRITICAL: Return in the EXACT format your frontend expects
     return NextResponse.json({ 
-      content: [{ text }]  // This matches what your frontend is looking for
+      content: [{ text: text || 'No response' }]
     })
 
   } catch (error) {
-    console.error('Chat API error:', error)
     return NextResponse.json({ 
       content: [{ text: `ERROR: ${error instanceof Error ? error.message : String(error)}` }]
     }, { status: 500 })
