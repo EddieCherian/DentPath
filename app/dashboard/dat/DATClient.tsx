@@ -71,12 +71,10 @@ export default function DATClient({ profile, userId }: Props) {
       : ''
 
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
           messages: [{
             role: 'user',
             content: `Generate a ${diffLevel} difficulty DAT (Dental Admission Test) multiple choice question for the subject: ${subject}.
@@ -100,12 +98,12 @@ Make it realistic and representative of actual DAT questions. Do not include any
       const clean = text.replace(/```json|```/g, '').trim()
       const parsed = JSON.parse(clean)
       setQuestion(parsed)
-    } catch (err) {
+    } catch (err: any) {
       setQuestion({
-        question: 'Failed to generate question. Check your API key in Vercel environment variables.',
+        question: `Error: ${err.message}`,
         options: ['Try again', 'Check API key', 'Refresh page', 'Contact support'],
         correctIndex: 0,
-        explanation: 'Make sure GEMINI_API_KEY is set in your Vercel environment variables.',
+        explanation: `Full error: ${JSON.stringify(err)}`,
         topic: 'Error',
         difficulty: diffLevel,
       })
@@ -158,12 +156,10 @@ Make it realistic and representative of actual DAT questions. Do not include any
     setChatLoading(true)
 
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
           messages: [{
             role: 'user',
             content: `You are an expert DAT tutor helping a pre-dental student. The student is studying ${activeSubject} for the DAT exam. Answer their question in a clear, helpful, and encouraging way. Use examples and mnemonics where helpful. Keep responses concise but thorough.
@@ -175,8 +171,8 @@ Student question: ${userMsg}`
       const data = await response.json()
       const text = data.content?.[0]?.text || 'Sorry, I could not generate a response.'
       setChatMessages(prev => [...prev, { role: 'ai', text }])
-    } catch {
-      setChatMessages(prev => [...prev, { role: 'ai', text: 'Sorry, something went wrong. Please check your API key.' }])
+    } catch (err: any) {
+      setChatMessages(prev => [...prev, { role: 'ai', text: `Sorry, something went wrong: ${err.message}` }])
     }
     setChatLoading(false)
   }
@@ -190,12 +186,10 @@ Student question: ${userMsg}`
     setExamTime(270 * 60)
 
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 4000,
           messages: [{
             role: 'user',
             content: `Generate 10 DAT practice exam questions covering: Biology (3), General Chemistry (2), Organic Chemistry (2), Quantitative Reasoning (2), Reading Comprehension (1). Mix of Easy, Medium, and Hard difficulties.
@@ -221,8 +215,8 @@ Do not include any text outside the JSON array.`
       const parsed = JSON.parse(clean)
       setExamQuestions(parsed)
       setExamStarted(true)
-    } catch {
-      alert('Failed to generate exam. Check your API key.')
+    } catch (err: any) {
+      alert(`Failed to generate exam: ${err.message}`)
     }
     setExamLoading(false)
   }
@@ -339,7 +333,7 @@ Do not include any text outside the JSON array.`
             <div style={{ backgroundColor: '#0D1525', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', padding: '2rem' }}>
               {loading ? (
                 <div style={{ textAlign: 'center', padding: '4rem 2rem' }}>
-                  <div style={{ fontSize: '2rem', marginBottom: '1rem', animation: 'spin 1s linear infinite' }}>⚙️</div>
+                  <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⚙️</div>
                   <div style={{ color: '#6B7A9A', fontSize: '0.9rem' }}>Gemini is generating your question...</div>
                   <div style={{ color: '#4A5570', fontSize: '0.8rem', marginTop: '0.5rem' }}>Tailored to {activeSubject} · {difficulty} difficulty</div>
                 </div>
@@ -452,7 +446,6 @@ Do not include any text outside the JSON array.`
           {/* AI TUTOR MODE */}
           {mode === 'tutor' && (
             <div style={{ backgroundColor: '#0D1525', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', overflow: 'hidden' }}>
-              {/* SUBJECT SELECTOR */}
               <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                 {subjects.map(s => (
                   <button
@@ -465,7 +458,6 @@ Do not include any text outside the JSON array.`
                 ))}
               </div>
 
-              {/* CHAT */}
               <div style={{ height: '420px', overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {chatMessages.map((msg, i) => (
                   <div key={i} style={{ display: 'flex', gap: '0.75rem', flexDirection: msg.role === 'user' ? 'row-reverse' : 'row', alignItems: 'flex-start' }}>
@@ -485,7 +477,6 @@ Do not include any text outside the JSON array.`
                 )}
               </div>
 
-              {/* QUICK PROMPTS */}
               <div style={{ padding: '0 1.5rem', display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
                 {[
                   `Explain a key concept in ${activeSubject}`,
@@ -495,7 +486,7 @@ Do not include any text outside the JSON array.`
                 ].map(prompt => (
                   <button
                     key={prompt}
-                    onClick={() => { setChatInput(prompt); }}
+                    onClick={() => setChatInput(prompt)}
                     style={{ backgroundColor: '#111B2E', border: '1px solid rgba(255,255,255,0.07)', color: '#6B7A9A', fontSize: '0.72rem', fontWeight: 500, padding: '0.3rem 0.7rem', borderRadius: '50px', cursor: 'pointer' }}
                   >
                     {prompt}
@@ -503,7 +494,6 @@ Do not include any text outside the JSON array.`
                 ))}
               </div>
 
-              {/* INPUT */}
               <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid rgba(255,255,255,0.07)', display: 'flex', gap: '0.75rem' }}>
                 <input
                   value={chatInput}
