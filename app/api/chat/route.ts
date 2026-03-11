@@ -6,17 +6,15 @@ export async function POST(req: NextRequest) {
     const apiKey = process.env.GEMINI_API_KEY
 
     if (!apiKey) {
-      return NextResponse.json({ error: 'API key not configured' }, { status: 500 })
+      return NextResponse.json({ 
+        content: [{ text: 'ERROR: No API key configured' }]  // Match expected format
+      }, { status: 500 })
     }
 
-    // Convert messages to Gemini format
-    const contents = messages.map((m: { role: string; content: string }) => ({
-      role: m.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: m.content }],
-    }))
-
-    // Use the model from your list
-    const model = 'gemini-2.5-flash'
+    // Get the last user message
+    const lastMessage = messages[messages.length - 1]
+    
+    const model = 'gemini-2.5-flash' // From your working models list
     
     const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`
     
@@ -24,7 +22,9 @@ export async function POST(req: NextRequest) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents,
+        contents: [{
+          parts: [{ text: lastMessage.content }]
+        }],
         generationConfig: {
           maxOutputTokens: 2048,
           temperature: 1.0,
@@ -33,31 +33,31 @@ export async function POST(req: NextRequest) {
     })
 
     const data = await response.json()
-    console.log('Full API response:', JSON.stringify(data, null, 2))
+    
+    if (!response.ok) {
+      return NextResponse.json({ 
+        content: [{ text: `ERROR: ${data.error?.message || 'Unknown error'}` }]
+      }, { status: response.status })
+    }
 
-    // FIXED: Properly extract the text from Gemini's response
-    // The path is: data.candidates[0].content.parts[0].text
+    // Extract the text from Gemini's response
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text
 
     if (!text) {
-      console.error('No text in response:', data)
       return NextResponse.json({ 
-        error: 'No text in response', 
-        fullResponse: data 
+        content: [{ text: 'ERROR: Empty response from Gemini' }]
       }, { status: 500 })
     }
 
-    // Return in the format your frontend expects
+    // ✅ CRITICAL: Return in the EXACT format your frontend expects
     return NextResponse.json({ 
-      role: 'assistant', 
-      content: text 
+      content: [{ text }]  // This matches what your frontend is looking for
     })
 
   } catch (error) {
     console.error('Chat API error:', error)
     return NextResponse.json({ 
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : String(error)
+      content: [{ text: `ERROR: ${error instanceof Error ? error.message : String(error)}` }]
     }, { status: 500 })
   }
 }
