@@ -92,4 +92,107 @@ export default function LandingPage() {
         </p>
 
         <div className="flex items-center gap-4 flex-wrap justify-center">
-          <Link href="/signup​​​​​​​​​​​​​​​​
+          <Link href="/signup" className="inline-flex items-center gap-2 bg-[#00C9A7] text-black font-bold px-8 py-3.5 rounded-full hover:bg-[#00A88B] transition-all hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(0,201,167,0.3)]">
+            Start for Free <ArrowRight size={18} />
+          </Link>
+          <Link href="/login" className="inline-flex items-center gap-2 bg-[#0D1525] text-white font-semibold px-8 py-3.5 rounded-full border border-white/10 hover:border-[#00C9A7]/40 hover:text-[#00C9A7] transition-all">
+            Log In
+          </Link>
+        </div>
+
+        <div className="flex items-center gap-12 mt-16 flex-wrap justify-center">
+          {stats.map((s) => (
+            <div key={s.label} className="text-center">
+              <div className="font-display text-4xl font-bold text-white">{s.num}</div>
+              <div className="text-xs text-[#6B7A9A] font-medium mt-1">{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section id="features" className="py-24 px-4 bg-[#080D18]">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 text-[#00C9A7] text-xs font-bold tracking-widest uppercase mb-3">
+              <span className="w-5 h-0.5 bg-[#00C9A7] rounded" />
+              Everything You Need
+            </div>
+            <h2 className="font-display text-5xl font-bold">Built for Every Stage<br />of Your Dental Journey</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {features.map((f) => (
+              <div key={f.title} className="bg-[#0D1525] border border-white/5 rounded-2xl p-6 hover:-translate-y-1 hover:border-[rgba(0,201,167,0.2)] transition-all duration-300 group">
+                <div className="w-11 h-11 rounded-xl bg-[rgba(0,201,167,0.08)] flex items-center justify-center mb-4 group-hover:bg-[rgba(0,201,167,0.12)] transition-colors">
+                  <f.icon size={20} className="text-[#00C9A7]" />
+                </div>
+                <h3 className="font-bold text-base mb-2">{f.title}</h3>
+                <p className="text-sm text-[#6B7A9A] leading-relaxed mb-4">{f.desc}</p>
+                <span className="inline-block bg-[rgba(0,201,167,0.1)] text-[#00C9A7] text-xs font-bold px-3 py-1 rounded-full">{f.tag}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* PRICING */}
+      <section id="pricing" className="py-24 px-4">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 text-[#00C9A7] text-xs font-bold tracking-widest uppercase mb-3">
+              <span className="w-5 h-0.5 bg-[#00C9A7] rounded" />
+              Simple Pricing
+            </div>
+            <h2 className="font-display text-5xl font-bold">Invest in Your Future<br />Dental Career</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {pricingPlans.map((plan) => (
+              <div key={plan.name} className={`relative rounded-2xl p-8 border transition-all ${plan.featured ? 'bg-[rgba(0,201,167,0.05)] border-[rgba(0,201,167,0.3)]' : 'bg-[#0D1525] border-white/5'}`}>
+                {plan.featured && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#00C9A7] text-black text-xs font-bold px-4 py-1 rounded-full">
+                    MOST POPULAR
+                  </div>
+                )}
+                <div className="text-xs font-bold tracking-widest uppercase text-[#6B7A9A] mb-2">{plan.name}</div>
+                <div className="font-display text-5xl font-bold mb-1">
+                  {plan.price}<span className="text-base font-sans font-normal text-[#6B7A9A]">{plan.period}</span>
+                </div>
+                <div className="text-sm text-[#6B7A9A] mb-6">{plan.desc}</div>
+                <ul className="space-y-2.5 mb-8">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-sm text-[#6B7A9A]">
+                      <CheckCircle size={14} className="text-[#00C9A7] mt-0.5 flex-shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                  {plan.excluded.map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-sm text-[#4A5570] line-through">
+                      <span className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/signup" className={`block w-full text-center py-3 rounded-full font-semibold text-sm transition-all ${plan.featured ? 'bg-[#00C9A7] text-black hover:bg-[#00A88B]' : 'bg-[#111B2E] border border-white/10 text-white hover:border-[#00C9A7] hover:text-[#00C9A7]'}`}>
+                  {plan.cta}
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="bg-[#0D1525] border-t border-white/5 py-12 px-4 text-center">
+        <div className="font-display text-2xl font-bold mb-3">Dent<span className="text-[#00C9A7]">Path</span></div>
+        <p className="text-sm text-[#6B7A9A] mb-6">The complete platform for dental students — pre-dental to DDS.</p>
+        <div className="flex gap-8 justify-center mb-6">
+          {['About', 'DAT Prep', 'Community', 'Blog', 'Contact'].map((l) => (
+            <a key={l} href="#" className="text-sm text-[#6B7A9A] hover:text-[#00C9A7] transition-colors">{l}</a>
+          ))}
+        </div>
+        <p className="text-xs text-[#4A5570]">© 2026 DentPath. All rights reserved.</p>
+      </footer>
+
+    </div>
+  )
+}
