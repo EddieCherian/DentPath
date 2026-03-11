@@ -5,6 +5,8 @@ const config: Config = {
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './lib/**/*.{js,ts,jsx,tsx}',
+    './types/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
@@ -12,7 +14,6 @@ const config: Config = {
         background: '#05080F',
         surface: '#0D1525',
         surface2: '#111B2E',
-        border: 'rgba(255,255,255,0.07)',
         teal: {
           DEFAULT: '#00C9A7',
           dark: '#00A88B',
@@ -27,13 +28,12 @@ const config: Config = {
         muted2: '#4A5570',
       },
       fontFamily: {
-        sans: ['Outfit', 'sans-serif'],
-        display: ['Cormorant Garamond', 'serif'],
-        mono: ['DM Mono', 'monospace'],
+        sans: ['var(--font-outfit)', 'sans-serif'],
+        display: ['var(--font-cormorant)', 'serif'],
+        mono: ['var(--font-dm-mono)', 'monospace'],
       },
-      backgroundImage: {
-        'glow-teal': 'radial-gradient(ellipse, rgba(0,201,167,0.10) 0%, transparent 65%)',
-        'glow-gold': 'radial-gradient(ellipse, rgba(240,192,96,0.05) 0%, transparent 65%)',
+      borderColor: {
+        DEFAULT: 'rgba(255,255,255,0.07)',
       },
       animation: {
         'fade-up': 'fadeUp 0.5s ease both',
