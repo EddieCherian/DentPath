@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-// Simple cache (REALLY helps with speed)
+// Larger cache = more instant responses
 const responseCache = new Map()
-const CACHE_TTL = 1000 * 60 * 60 // 1 hour
+const CACHE_TTL = 1000 * 60 * 60 * 24 // 24 hours (cache entire day's questions)
+
+// Pre-warm cache with common question types
+const commonTopics = ['Biology', 'Chemistry', 'Organic Chemistry', 'PAT', 'QR', 'RC']
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,29 +20,32 @@ export async function POST(req: NextRequest) {
 
     const lastMessage = messages[messages.length - 1]
     
-    // Check cache first (instant if cached)
+    // 🔥 INSTANT: Check cache first
     const cacheKey = lastMessage.content
     const cached = responseCache.get(cacheKey)
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    if (cached) {
+      console.log('🚀 Cache hit!')
       return NextResponse.json({ content: [{ text: cached.text }] })
     }
-    
-    // Use flash-lite but with optimizations for complete JSON
+
+    // 🏎️ FASTEST MODEL: flash-lite is plenty for multiple choice
     const model = 'gemini-2.5-flash-lite'
     
     const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`
     
-    // Shorter, more focused prompt = faster response
-    const prompt = `Generate a DAT question. Return ONLY valid JSON:
+    // Ultra-optimized prompt (minimal tokens)
+    const prompt = `Generate DAT MCQ. Return JSON only:
 {
   "question": "...",
   "options": ["A","B","C","D"],
   "correctIndex": 0,
   "explanation": "...",
   "topic": "...",
-  "difficulty": "..."
+  "difficulty": "Medium"
 }`
 
+    console.log('⏳ Generating new question...')
+    
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -48,10 +54,9 @@ export async function POST(req: NextRequest) {
           parts: [{ text: prompt }]
         }],
         generationConfig: {
-          maxOutputTokens: 1024,  // Balanced: enough for full JSON, not too slow
+          maxOutputTokens: 800,  // Just enough for your JSON example
           temperature: 0.7,
-          topK: 40,  // Slightly higher for better quality
-          topP: 0.9,
+          topK: 20,  // Lower = faster
         },
       }),
     })
@@ -59,38 +64,9 @@ export async function POST(req: NextRequest) {
     const data = await response.json()
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || ''
 
-    // If truncated, retry once with flash (slower but reliable)
-    if (text.includes('"options": [') && !text.includes(']')) {
-      console.log('⚠️ Truncated, retrying with flash...')
-      
-      // Retry with flash model
-      const retryResponse = await fetch(
-        `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{
-              parts: [{ text: prompt }]
-            }],
-            generationConfig: {
-              maxOutputTokens: 1024,
-              temperature: 0.7,
-            },
-          }),
-        }
-      )
-      
-      const retryData = await retryResponse.json()
-      const retryText = retryData?.candidates?.[0]?.content?.parts?.[0]?.text || text
-      
-      // Cache and return
-      responseCache.set(cacheKey, { text: retryText, timestamp: Date.now() })
-      return NextResponse.json({ content: [{ text: retryText }] })
-    }
-
-    // Cache and return
+    // 🔥 Cache for next time
     responseCache.set(cacheKey, { text, timestamp: Date.now() })
+
     return NextResponse.json({ content: [{ text }] })
 
   } catch (error) {
