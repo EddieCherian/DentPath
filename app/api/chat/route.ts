@@ -15,18 +15,18 @@ export async function POST(req: NextRequest) {
       parts: [{ text: m.content }],
     }))
 
-    // Use v1 API (not v1beta) with correct Gemini 3 model names
+    // Using the EXACT model names from your list
     const modelsToTry = [
-      'gemini-3.1-pro-preview',
-      'gemini-3-flash-preview',
-      'gemini-3.1-flash-lite-preview'
+      'gemini-2.5-flash',  // From your list - this should work!
+      'gemini-2.5-pro',    // From your list
+      'gemini-2.5-flash-lite' // From your list
     ]
 
     for (const model of modelsToTry) {
       try {
-        console.log(`Trying model: ${model} with v1 API`)
+        console.log(`Trying model: ${model}`)
         
-        // IMPORTANT: Using v1 API, not v1beta
+        // Use v1 API (not v1beta) - this matches your curl command
         const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`
         
         const response = await fetch(url, {
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
             contents,
             generationConfig: {
               maxOutputTokens: 2048,
-              temperature: 1.0, // Gemini 3 works best with temperature 1.0 [citation:3]
+              temperature: 1.0,
             },
           }),
         })
@@ -48,7 +48,10 @@ export async function POST(req: NextRequest) {
           const text = data.candidates?.[0]?.content?.parts?.[0]?.text
           
           if (text) {
-            return NextResponse.json({ role: 'assistant', content: text })
+            return NextResponse.json({ 
+              role: 'assistant', 
+              content: text 
+            })
           }
         } else {
           console.log(`❌ Model ${model} failed:`, data.error?.message)
