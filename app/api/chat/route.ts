@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
   const apiKey = process.env.GEMINI_API_KEY
 
   if (!apiKey) {
-    return NextResponse.json({ content: [{ text: 'ERROR: GEMINI_API_KEY is missing' }] })
+    return NextResponse.json({ content: [{ text: 'ERROR: No API key' }] })
   }
 
   const contents = messages.map((m: { role: string; content: string }) => ({
@@ -30,16 +30,8 @@ export async function POST(req: NextRequest) {
   )
 
   const data = await response.json()
-
-  if (!response.ok) {
-    return NextResponse.json({ content: [{ text: `ERROR ${response.status}: ${JSON.stringify(data)}` }] })
-  }
-
   const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
 
-  if (!text) {
-    return NextResponse.json({ content: [{ text: `ERROR: Empty response from Gemini. Raw: ${JSON.stringify(data)}` }] })
-  }
-
-  return NextResponse.json({ content: [{ text }] })
+  // Return the raw text so we can see exactly what Gemini sends back
+  return NextResponse.json({ content: [{ text: `RAW RESPONSE: ${text}` }] })
 }
