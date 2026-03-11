@@ -1,12 +1,9 @@
-import type { Config } from 'tailwindcss'
-
-const config: Config = {
+/** @type {import('tailwindcss').Config} */
+module.exports = {
   content: [
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
-    './lib/**/*.{js,ts,jsx,tsx}',
-    './types/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
@@ -32,22 +29,7 @@ const config: Config = {
         display: ['var(--font-cormorant)', 'serif'],
         mono: ['var(--font-dm-mono)', 'monospace'],
       },
-      borderColor: {
-        DEFAULT: 'rgba(255,255,255,0.07)',
-      },
-      animation: {
-        'fade-up': 'fadeUp 0.5s ease both',
-        'pulse-slow': 'pulse 6s ease-in-out infinite',
-      },
-      keyframes: {
-        fadeUp: {
-          from: { opacity: '0', transform: 'translateY(20px)' },
-          to: { opacity: '1', transform: 'translateY(0)' },
-        },
-      },
     },
   },
   plugins: [],
 }
-
-export default config
