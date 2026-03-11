@@ -1,8 +1,7 @@
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import Sidebar from '@/components/Sidebar'
-import Navbar from '@/components/Navbar'
+import DashboardShell from './DashboardShell'
 
 export default async function DashboardLayout({
   children,
@@ -20,17 +19,11 @@ export default async function DashboardLayout({
     .single()
 
   return (
-    <div className="min-h-screen bg-[#05080F] flex">
-      <Sidebar userType={profile?.user_type || 'pre-dental'} />
-      <div className="flex-1 flex flex-col min-h-screen md:ml-64">
-        <Navbar
-          fullName={profile?.full_name || ''}
-          email={session.user.email || ''}
-        />
-        <main className="flex-1 pt-16">
-          {children}
-        </main>
-      </div>
-    </div>
+    <DashboardShell
+      profile={profile}
+      email={session.user.email || ''}
+    >
+      {children}
+    </DashboardShell>
   )
 }
