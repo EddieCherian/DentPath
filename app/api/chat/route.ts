@@ -15,56 +15,49 @@ export async function POST(req: NextRequest) {
       parts: [{ text: m.content }],
     }))
 
-    // Using the EXACT model names from your list
-    const modelsToTry = [
-      'gemini-2.5-flash',  // From your list - this should work!
-      'gemini-2.5-pro',    // From your list
-      'gemini-2.5-flash-lite' // From your list
-    ]
+    // Use the model from your list
+    const model = 'gemini-2.5-flash'
+    
+    const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents,
+        generationConfig: {
+          maxOutputTokens: 2048,
+          temperature: 1.0,
+        },
+      }),
+    })
 
-    for (const model of modelsToTry) {
-      try {
-        console.log(`Trying model: ${model}`)
-        
-        // Use v1 API (not v1beta) - this matches your curl command
-        const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`
-        
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents,
-            generationConfig: {
-              maxOutputTokens: 2048,
-              temperature: 1.0,
-            },
-          }),
-        })
+    const data = await response.json()
+    console.log('Full API response:', JSON.stringify(data, null, 2))
 
-        const data = await response.json()
+    // FIXED: Properly extract the text from Gemini's response
+    // The path is: data.candidates[0].content.parts[0].text
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text
 
-        if (response.ok) {
-          console.log(`✅ Model ${model} worked!`)
-          const text = data.candidates?.[0]?.content?.parts?.[0]?.text
-          
-          if (text) {
-            return NextResponse.json({ 
-              role: 'assistant', 
-              content: text 
-            })
-          }
-        } else {
-          console.log(`❌ Model ${model} failed:`, data.error?.message)
-        }
-      } catch (error) {
-        console.log(`❌ Model ${model} error:`, error)
-      }
+    if (!text) {
+      console.error('No text in response:', data)
+      return NextResponse.json({ 
+        error: 'No text in response', 
+        fullResponse: data 
+      }, { status: 500 })
     }
 
-    return NextResponse.json({ error: 'All models failed' }, { status: 500 })
+    // Return in the format your frontend expects
+    return NextResponse.json({ 
+      role: 'assistant', 
+      content: text 
+    })
 
   } catch (error) {
     console.error('Chat API error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : String(error)
+    }, { status: 500 })
   }
 }
