@@ -81,13 +81,24 @@ export default function DATClient({ profile, userId }: Props) {
   const [examTime, setExamTime] = useState(270 * 60)
   const [examStarted, setExamStarted] = useState(false)
   const [examLoading, setExamLoading] = useState(false)
-  // ADDED: State for prefetching
-  const [nextQuestionPrefetched, setNextQuestionPrefetched] = useState(false)
+  // FIXED: Add state for prefetched question
+  const [prefetchedQuestion, setPrefetchedQuestion] = useState<Question | null>(null)
+  const [isPrefetching, setIsPrefetching] = useState(false)
 
   const generateQuestion = useCallback(async (subj?: string, diff?: string) => {
     setLoading(true)
     setSelectedAnswer(null)
     setAnswered(false)
+    
+    // FIXED: Use prefetched question if available
+    if (prefetchedQuestion) {
+      console.log('🚀 Using prefetched question!')
+      setQuestion(prefetchedQuestion)
+      setPrefetchedQuestion(null)
+      setLoading(false)
+      return
+    }
+
     setQuestion(null)
 
     const subject = subj || activeSubject
@@ -134,20 +145,15 @@ Make it realistic and representative of actual DAT questions. Do not include any
       })
     }
     setLoading(false)
-  }, [activeSubject, difficulty, weakTopics])
+  }, [activeSubject, difficulty, weakTopics, prefetchedQuestion])
 
+  // FIXED: Prefetch next question
   useEffect(() => {
-    if (mode === 'practice' || mode === 'flashcard') {
-      generateQuestion()
-    }
-  }, [activeSubject, mode])
-
-  // ADDED: Prefetch next question while user is reading current one
-  useEffect(() => {
-    if (mode === 'practice' && question && !loading && !nextQuestionPrefetched) {
+    if (mode === 'practice' && question && !loading && !isPrefetching) {
       const prefetchNext = async () => {
+        setIsPrefetching(true)
         try {
-          await fetch('/api/chat', {
+          const response = await fetch('/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -157,17 +163,27 @@ Make it realistic and representative of actual DAT questions. Do not include any
               }]
             })
           })
-          setNextQuestionPrefetched(true)
+          const data = await response.json()
+          const text = data.content?.[0]?.text || ''
+          const parsed = extractJSON(text, false)
+          setPrefetchedQuestion(parsed)
           console.log('🎯 Next question pre-fetched!')
         } catch (e) {
           console.log('Pre-fetch failed')
         }
+        setIsPrefetching(false)
       }
       
       const timer = setTimeout(prefetchNext, 2000)
       return () => clearTimeout(timer)
     }
-  }, [mode, question, loading, activeSubject, difficulty, nextQuestionPrefetched])
+  }, [mode, question, loading, activeSubject, difficulty, isPrefetching])
+
+  useEffect(() => {
+    if (mode === 'practice' || mode === 'flashcard') {
+      generateQuestion()
+    }
+  }, [activeSubject, mode])
 
   useEffect(() => {
     let timer: NodeJS.Timeout
@@ -440,10 +456,7 @@ Do not include any text outside the JSON array.`
 
                   <div style={{ display: 'flex', gap: '0.75rem' }}>
                     <button
-                      onClick={() => {
-                        setNextQuestionPrefetched(false)
-                        generateQuestion()
-                      }}
+                      onClick={() => generateQuestion()}
                       style={{ backgroundColor: '#00C9A7', border: 'none', color: '#000', padding: '0.7rem 1.5rem', borderRadius: '50px', fontSize: '0.875rem', fontWeight: 700, cursor: 'pointer' }}
                     >
                       Next Question →
@@ -490,10 +503,7 @@ Do not include any text outside the JSON array.`
                   </div>
                   <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
                     <button onClick={() => setFlipped(!flipped)} style={{ backgroundColor: '#0D1525', border: '1px solid rgba(0,201,167,0.2)', color: '#00C9A7', padding: '0.65rem 1.5rem', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}>Flip</button>
-                    <button onClick={() => {
-                      setNextQuestionPrefetched(false)
-                      generateQuestion()
-                    }} style={{ backgroundColor: '#00C9A7', border: 'none', color: '#000', padding: '0.65rem 1.75rem', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer' }}>Next Card →</button>
+                    <button onClick={() => generateQuestion()} style={{ backgroundColor: '#00C9A7', border: 'none', color: '#000', padding: '0.65rem 1.75rem', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer' }}>Next Card →</button>
                   </div>
                 </>
               ) : null}
