@@ -4,7 +4,6 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { ArrowRight, GraduationCap, Stethoscope } from 'lucide-react'
 
 type UserType = 'pre-dental' | 'dental-student' | null
 
@@ -34,14 +33,10 @@ export default function SignupPage() {
       },
     })
 
-    if (signupError) {
-      setError(signupError.message)
-      setLoading(false)
-      return
-    }
+    if (signupError) { setError(signupError.message); setLoading(false); return }
 
     if (data.user) {
-      const { error: profileError } = await supabase.from('profiles').upsert({
+      await supabase.from('profiles').upsert({
         id: data.user.id,
         email,
         full_name: fullName,
@@ -52,12 +47,6 @@ export default function SignupPage() {
         schools_count: 0,
         created_at: new Date().toISOString(),
       })
-
-      if (profileError) {
-        setError(profileError.message)
-        setLoading(false)
-        return
-      }
     }
 
     router.push('/dashboard')
@@ -70,40 +59,72 @@ export default function SignupPage() {
       provider: 'google',
       options: { redirectTo: `${window.location.origin}/auth/callback` },
     })
-    if (error) {
-      setError(error.message)
-      setLoading(false)
-    }
+    if (error) { setError(error.message); setLoading(false) }
+  }
+
+  const inputStyle = {
+    width: '100%',
+    backgroundColor: '#111B2E',
+    border: '1px solid rgba(255,255,255,0.07)',
+    borderRadius: '12px',
+    padding: '0.75rem 1rem',
+    fontSize: '0.9rem',
+    color: '#EEF2FF',
+    outline: 'none',
+    boxSizing: 'border-box' as const,
+  }
+
+  const labelStyle = {
+    display: 'block' as const,
+    fontSize: '0.75rem',
+    fontWeight: 700,
+    color: '#6B7A9A',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.5px',
+    marginBottom: '0.5rem',
   }
 
   return (
-    <div className="min-h-screen bg-[#05080F] flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-10">
-          <Link href="/" className="font-display text-3xl font-bold">
-            Dent<span className="text-[#00C9A7]">Path</span>
+    <div style={{ minHeight: '100vh', backgroundColor: '#05080F', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', fontFamily: 'system-ui, sans-serif' }}>
+      <div style={{ width: '100%', maxWidth: '440px' }}>
+
+        {/* LOGO */}
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <Link href="/" style={{ fontSize: '1.8rem', fontWeight: 900, color: '#EEF2FF', textDecoration: 'none' }}>
+            Dent<span style={{ color: '#00C9A7' }}>Path</span>
           </Link>
-          <h1 className="text-2xl font-bold mt-6 mb-2">
+
+          {/* STEP INDICATOR */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '1.5rem' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#00C9A7', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 700 }}>1</div>
+            <div style={{ width: '40px', height: '2px', backgroundColor: step === 2 ? '#00C9A7' : 'rgba(255,255,255,0.1)', borderRadius: '1px', transition: 'background 0.3s' }} />
+            <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: step === 2 ? '#00C9A7' : '#111B2E', border: step === 2 ? 'none' : '1px solid rgba(255,255,255,0.1)', color: step === 2 ? '#000' : '#6B7A9A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 700, transition: 'all 0.3s' }}>2</div>
+          </div>
+
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#EEF2FF', marginTop: '1rem', marginBottom: '0.3rem' }}>
             {step === 1 ? 'Create your account' : 'One last thing'}
           </h1>
-          <p className="text-[#6B7A9A] text-sm">
-            {step === 1 ? 'Start your dental journey today' : 'Tell us where you are in your journey'}
+          <p style={{ color: '#6B7A9A', fontSize: '0.875rem' }}>
+            {step === 1 ? 'Start your dental journey today — free' : 'Tell us where you are in your journey'}
           </p>
         </div>
 
-        <div className="bg-[#0D1525] border border-white/5 rounded-2xl p-8">
+        {/* CARD */}
+        <div style={{ backgroundColor: '#0D1525', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '24px', padding: '2rem' }}>
+
           {error && (
-            <div className="bg-[rgba(255,107,138,0.1)] border border-[rgba(255,107,138,0.2)] text-[#FF6B8A] text-sm rounded-xl px-4 py-3 mb-6">
+            <div style={{ backgroundColor: 'rgba(255,107,138,0.1)', border: '1px solid rgba(255,107,138,0.2)', color: '#FF6B8A', fontSize: '0.85rem', borderRadius: '12px', padding: '0.75rem 1rem', marginBottom: '1.25rem' }}>
               {error}
             </div>
           )}
 
+          {/* STEP 1 */}
           {step === 1 && (
             <>
               <button
                 onClick={handleGoogleSignup}
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-3 bg-white text-black font-semibold text-sm py-3 rounded-xl hover:bg-gray-100 transition-all mb-6 disabled:opacity-50"
+                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', backgroundColor: 'white', color: '#000', fontWeight: 600, fontSize: '0.9rem', padding: '0.85rem', borderRadius: '14px', border: 'none', cursor: 'pointer', marginBottom: '1.25rem' }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -114,106 +135,103 @@ export default function SignupPage() {
                 Continue with Google
               </button>
 
-              <div className="flex items-center gap-3 mb-6">
-                <div className="flex-1 h-px bg-white/10" />
-                <span className="text-xs text-[#6B7A9A]">or sign up with email</span>
-                <div className="flex-1 h-px bg-white/10" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
+                <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.07)' }} />
+                <span style={{ fontSize: '0.75rem', color: '#6B7A9A' }}>or sign up with email</span>
+                <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.07)' }} />
               </div>
 
-              <form onSubmit={(e) => { e.preventDefault(); setStep(2) }} className="space-y-4">
+              <form onSubmit={(e) => { e.preventDefault(); setStep(2) }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div>
-                  <label className="text-xs font-semibold text-[#6B7A9A] uppercase tracking-wider block mb-2">Full Name</label>
-                  <input
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    required
-                    placeholder="Your full name"
-                    className="w-full bg-[#111B2E] border border-white/5 rounded-xl px-4 py-3 text-sm text-white placeholder:text-[#4A5570] outline-none focus:border-[rgba(0,201,167,0.4)] transition-colors"
-                  />
+                  <label style={labelStyle}>Full Name</label>
+                  <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required placeholder="Your full name" style={inputStyle} />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-[#6B7A9A] uppercase tracking-wider block mb-2">Email</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    placeholder="you@university.edu"
-                    className="w-full bg-[#111B2E] border border-white/5 rounded-xl px-4 py-3 text-sm text-white placeholder:text-[#4A5570] outline-none focus:border-[rgba(0,201,167,0.4)] transition-colors"
-                  />
+                  <label style={labelStyle}>Email</label>
+                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="you@university.edu" style={inputStyle} />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-[#6B7A9A] uppercase tracking-wider block mb-2">Password</label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={8}
-                    placeholder="Min. 8 characters"
-                    className="w-full bg-[#111B2E] border border-white/5 rounded-xl px-4 py-3 text-sm text-white placeholder:text-[#4A5570] outline-none focus:border-[rgba(0,201,167,0.4)] transition-colors"
-                  />
+                  <label style={labelStyle}>Password</label>
+                  <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} placeholder="Min. 8 characters" style={inputStyle} />
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-[#00C9A7] text-black font-bold py-3 rounded-xl hover:bg-[#00A88B] transition-all flex items-center justify-center gap-2 mt-2"
+                  style={{ width: '100%', backgroundColor: '#00C9A7', color: '#000', fontWeight: 700, fontSize: '0.95rem', padding: '0.85rem', borderRadius: '14px', border: 'none', cursor: 'pointer', marginTop: '0.5rem' }}
                 >
-                  Continue <ArrowRight size={16} />
+                  Continue →
                 </button>
               </form>
             </>
           )}
 
+          {/* STEP 2 */}
           {step === 2 && (
-            <form onSubmit={handleSignup} className="space-y-4">
-              <p className="text-sm text-[#6B7A9A] mb-6">This helps us personalize your dashboard and show you the right tools.</p>
+            <form onSubmit={handleSignup} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <p style={{ fontSize: '0.85rem', color: '#6B7A9A', marginBottom: '0.5rem', lineHeight: 1.6 }}>
+                This helps us personalize your dashboard and show you the right tools for your stage.
+              </p>
+
+              {/* PRE-DENTAL OPTION */}
               <button
                 type="button"
                 onClick={() => setUserType('pre-dental')}
-                className={`w-full flex items-center gap-4 p-5 rounded-xl border transition-all text-left ${userType === 'pre-dental' ? 'border-[#00C9A7] bg-[rgba(0,201,167,0.08)]' : 'border-white/5 bg-[#111B2E] hover:border-white/20'}`}
+                style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.1rem 1.2rem', borderRadius: '16px', border: `2px solid ${userType === 'pre-dental' ? '#00C9A7' : 'rgba(255,255,255,0.07)'}`, backgroundColor: userType === 'pre-dental' ? 'rgba(0,201,167,0.08)' : '#111B2E', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s', width: '100%' }}
               >
-                <div className="w-12 h-12 rounded-xl bg-[rgba(0,201,167,0.1)] flex items-center justify-center flex-shrink-0">
-                  <GraduationCap size={22} className="text-[#00C9A7]" />
-                </div>
+                <div style={{ width: '48px', height: '48px', borderRadius: '14px', backgroundColor: 'rgba(0,201,167,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', flexShrink: 0 }}>🎓</div>
                 <div>
-                  <div className="font-bold text-sm">I'm Pre-Dental</div>
-                  <div className="text-xs text-[#6B7A9A] mt-0.5">Preparing for DAT, applying to dental school</div>
+                  <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#EEF2FF', marginBottom: '0.2rem' }}>I'm Pre-Dental</div>
+                  <div style={{ fontSize: '0.8rem', color: '#6B7A9A' }}>Preparing for DAT, applying to dental school</div>
                 </div>
+                {userType === 'pre-dental' && (
+                  <div style={{ marginLeft: 'auto', width: '22px', height: '22px', borderRadius: '50%', backgroundColor: '#00C9A7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <span style={{ color: '#000', fontSize: '0.75rem', fontWeight: 700 }}>✓</span>
+                  </div>
+                )}
               </button>
+
+              {/* DENTAL STUDENT OPTION */}
               <button
                 type="button"
                 onClick={() => setUserType('dental-student')}
-                className={`w-full flex items-center gap-4 p-5 rounded-xl border transition-all text-left ${userType === 'dental-student' ? 'border-[#00C9A7] bg-[rgba(0,201,167,0.08)]' : 'border-white/5 bg-[#111B2E] hover:border-white/20'}`}
+                style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.1rem 1.2rem', borderRadius: '16px', border: `2px solid ${userType === 'dental-student' ? '#F0C060' : 'rgba(255,255,255,0.07)'}`, backgroundColor: userType === 'dental-student' ? 'rgba(240,192,96,0.08)' : '#111B2E', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s', width: '100%' }}
               >
-                <div className="w-12 h-12 rounded-xl bg-[rgba(240,192,96,0.1)] flex items-center justify-center flex-shrink-0">
-                  <Stethoscope size={22} className="text-[#F0C060]" />
-                </div>
+                <div style={{ width: '48px', height: '48px', borderRadius: '14px', backgroundColor: 'rgba(240,192,96,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', flexShrink: 0 }}>🦷</div>
                 <div>
-                  <div className="font-bold text-sm">I'm a Dental Student</div>
-                  <div className="text-xs text-[#6B7A9A] mt-0.5">Currently enrolled in dental school (D1–D4)</div>
+                  <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#EEF2FF', marginBottom: '0.2rem' }}>I'm a Dental Student</div>
+                  <div style={{ fontSize: '0.8rem', color: '#6B7A9A' }}>Currently enrolled in dental school (D1–D4)</div>
                 </div>
+                {userType === 'dental-student' && (
+                  <div style={{ marginLeft: 'auto', width: '22px', height: '22px', borderRadius: '50%', backgroundColor: '#F0C060', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <span style={{ color: '#000', fontSize: '0.75rem', fontWeight: 700 }}>✓</span>
+                  </div>
+                )}
               </button>
+
               <button
                 type="submit"
                 disabled={!userType || loading}
-                className="w-full bg-[#00C9A7] text-black font-bold py-3 rounded-xl hover:bg-[#00A88B] transition-all flex items-center justify-center gap-2 disabled:opacity-40 mt-2"
+                style={{ width: '100%', backgroundColor: userType ? '#00C9A7' : '#111B2E', color: userType ? '#000' : '#4A5570', fontWeight: 700, fontSize: '0.95rem', padding: '0.85rem', borderRadius: '14px', border: 'none', cursor: userType ? 'pointer' : 'not-allowed', marginTop: '0.5rem', transition: 'all 0.2s' }}
               >
-                {loading ? 'Creating account...' : <>Create Account <ArrowRight size={16} /></>}
+                {loading ? 'Creating account...' : 'Create Account →'}
               </button>
-              <button type="button" onClick={() => setStep(1)} className="w-full text-sm text-[#6B7A9A] hover:text-white transition-colors">
+
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                style={{ background: 'none', border: 'none', color: '#6B7A9A', fontSize: '0.875rem', cursor: 'pointer', padding: '0.25rem' }}
+              >
                 ← Back
               </button>
             </form>
           )}
         </div>
 
-        <p className="text-center text-sm text-[#6B7A9A] mt-6">
+        <p style={{ textAlign: 'center', fontSize: '0.875rem', color: '#6B7A9A', marginTop: '1.5rem' }}>
           Already have an account?{' '}
-          <Link href="/login" className="text-[#00C9A7] font-semibold hover:underline">Log in</Link>
+          <Link href="/login" style={{ color: '#00C9A7', fontWeight: 600, textDecoration: 'none' }}>Log in</Link>
         </p>
+
       </div>
     </div>
   )
 }
-
