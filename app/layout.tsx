@@ -6,6 +6,7 @@ const outfit = Outfit({
   subsets: ['latin'],
   variable: '--font-outfit',
   display: 'swap',
+  weight: ['300', '400', '500', '600', '700'],
 })
 
 const cormorant = Cormorant_Garamond({
@@ -24,13 +25,7 @@ const dmMono = DM_Mono({
 
 export const metadata: Metadata = {
   title: 'DentPath — Your Dental Career, Perfected',
-  description: 'The complete platform for dental students — DAT prep, application tracking, clinical tools, AI tutor, and career planning all in one place.',
-  keywords: ['dental school', 'DAT prep', 'dental student', 'INBDE', 'dental application'],
-  openGraph: {
-    title: 'DentPath — Your Dental Career, Perfected',
-    description: 'From pre-dental to DDS, DentPath has every tool you need.',
-    type: 'website',
-  },
+  description: 'The complete platform for dental students.',
 }
 
 export default function RootLayout({
@@ -39,8 +34,14 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${outfit.variable} ${cormorant.variable} ${dmMono.variable}`}>
-      <body className="bg-background text-white font-sans antialiased min-h-screen">
+    <html
+      lang="en"
+      className={`${outfit.variable} ${cormorant.variable} ${dmMono.variable}`}
+    >
+      <body
+        style={{ backgroundColor: '#05080F', color: '#EEF2FF' }}
+        className="font-sans antialiased min-h-screen"
+      >
         {children}
       </body>
     </html>
