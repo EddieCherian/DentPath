@@ -33,6 +33,30 @@ const subjects = [
 
 const difficultyLevels = ['Easy', 'Medium', 'Hard']
 
+function extractJSON(text: string, isArray: boolean): any {
+  try {
+    // Try direct parse first
+    return JSON.parse(text.trim())
+  } catch {}
+
+  // Strip markdown code fences
+  const stripped = text.replace(/```json|```/g, '').trim()
+  try {
+    return JSON.parse(stripped)
+  } catch {}
+
+  // Extract with regex
+  const pattern = isArray ? /\[[\s\S]*\]/ : /\{[\s\S]*\}/
+  const match = stripped.match(pattern)
+  if (match) {
+    try {
+      return JSON.parse(match[0])
+    } catch {}
+  }
+
+  throw new Error(`Could not parse JSON from response: ${text.slice(0, 300)}`)
+}
+
 export default function DATClient({ profile, userId }: Props) {
   const [activeSubject, setActiveSubject] = useState('Biology')
   const [difficulty, setDifficulty] = useState('Medium')
@@ -95,8 +119,7 @@ Make it realistic and representative of actual DAT questions. Do not include any
 
       const data = await response.json()
       const text = data.content?.[0]?.text || ''
-      const clean = text.replace(/```json|```/g, '').trim()
-      const parsed = JSON.parse(clean)
+      const parsed = extractJSON(text, false)
       setQuestion(parsed)
     } catch (err: any) {
       setQuestion({
@@ -210,9 +233,8 @@ Do not include any text outside the JSON array.`
         })
       })
       const data = await response.json()
-      const text = data.content?.[0]?.text || '[]'
-      const clean = text.replace(/```json|```/g, '').trim()
-      const parsed = JSON.parse(clean)
+      const text = data.content?.[0]?.text || ''
+      const parsed = extractJSON(text, true)
       setExamQuestions(parsed)
       setExamStarted(true)
     } catch (err: any) {
