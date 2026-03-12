@@ -6,46 +6,51 @@ export async function POST(req: NextRequest) {
     const apiKey = process.env.GEMINI_API_KEY
 
     if (!apiKey) {
-      return NextResponse.json({ content: [{ text: 'ERROR: No API key configured' }] })
+      return NextResponse.json({ 
+        content: [{ text: 'ERROR: No API key configured' }] 
+      })
     }
 
-    const contents = messages.map((m: { role: string; content: string }) => ({
-      role: m.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: m.content }],
-    }))
-
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents,
-          generationConfig: {
-            maxOutputTokens: 2048,
-            temperature: 0.7,
-          },
-        }),
-      }
-    )
+    const lastMessage = messages[messages.length - 1]
+    
+    // ✅ CORRECT model name from your list
+    const model = 'gemini-2.5-flash'  // Removed -preview-05-20
+    
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: lastMessage.content }]
+        }],
+        generationConfig: {
+          maxOutputTokens: 1024,
+          temperature: 0.7,
+        },
+      }),
+    })
 
     const data = await response.json()
-
+    
     if (!response.ok) {
-      return NextResponse.json({ content: [{ text: `ERROR ${response.status}: ${JSON.stringify(data)}` }] })
+      console.error('Gemini API error:', data)
+      return NextResponse.json({ 
+        content: [{ text: `ERROR: ${data.error?.message || 'Unknown error'}` }]
+      })
     }
 
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text
 
-    if (!text) {
-      return NextResponse.json({ content: [{ text: `ERROR: Empty response. Raw: ${JSON.stringify(data)}` }] })
-    }
-
-    return NextResponse.json({ content: [{ text }] })
+    return NextResponse.json({ 
+      content: [{ text: text || 'No response' }]
+    })
 
   } catch (error) {
-    return NextResponse.json({
+    console.error('Chat API error:', error)
+    return NextResponse.json({ 
       content: [{ text: `ERROR: ${error instanceof Error ? error.message : String(error)}` }]
-    }, { status: 500 })
+    })
   }
 }
