@@ -1,3 +1,4 @@
+// app/api/chat/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
@@ -13,8 +14,8 @@ export async function POST(req: NextRequest) {
 
     const lastMessage = messages[messages.length - 1]
     
-    // ✅ CORRECT model name from your list
-    const model = 'gemini-2.5-flash'  // Removed -preview-05-20
+    // Use the correct model name
+    const model = 'gemini-2.5-flash'
     
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`
     
@@ -23,7 +24,9 @@ export async function POST(req: NextRequest) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{
-          parts: [{ text: lastMessage.content }]
+          parts: [{ 
+            text: lastMessage.content + '\n\nIMPORTANT: Return ONLY valid JSON. No explanations, no markdown, no backticks.' 
+          }]
         }],
         generationConfig: {
           maxOutputTokens: 1024,
@@ -43,8 +46,17 @@ export async function POST(req: NextRequest) {
 
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text
 
+    if (!text) {
+      return NextResponse.json({ 
+        content: [{ text: 'ERROR: Empty response from Gemini' }]
+      })
+    }
+
+    // Log what we're sending back
+    console.log('Sending to client:', text.substring(0, 200))
+    
     return NextResponse.json({ 
-      content: [{ text: text || 'No response' }]
+      content: [{ text }]
     })
 
   } catch (error) {
