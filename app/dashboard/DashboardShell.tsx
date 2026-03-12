@@ -17,6 +17,7 @@ const preDentalLinks = [
   { href: '/dashboard/apply', icon: '📋', label: 'Application Tracker' },
   { href: '/dashboard/essay', icon: '✍️', label: 'Essay Coach' },
   { href: '/dashboard/interview', icon: '🎤', label: 'Interview Prep' },
+  { href: '/dashboard/ai', icon: '🤖', label: 'AI Tutor' },
   { href: '/dashboard/community', icon: '💬', label: 'Community' },
   { href: '/dashboard/career', icon: '🏆', label: 'Career Planner' },
 ]
@@ -26,6 +27,7 @@ const dentalLinks = [
   { href: '/dashboard/clinical', icon: '🦷', label: 'Clinical Tracker' },
   { href: '/dashboard/boards', icon: '📚', label: 'Board Prep' },
   { href: '/dashboard/anatomy', icon: '🔬', label: 'Anatomy Tools' },
+  { href: '/dashboard/ai', icon: '🤖', label: 'AI Tutor' },
   { href: '/dashboard/community', icon: '💬', label: 'Community' },
   { href: '/dashboard/career', icon: '🏆', label: 'Career Planner' },
 ]
