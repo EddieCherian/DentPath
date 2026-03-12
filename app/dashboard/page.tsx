@@ -8,15 +8,13 @@ const preDentalModules = [
   { icon: '📋', title: 'Application Tracker', desc: 'Track schools, deadlines, LORs, and secondaries', href: '/dashboard/apply', status: 'coming-soon', color: '#F0C060' },
   { icon: '✍️', title: 'Essay Coach', desc: 'AI-powered personal statement review and feedback', href: '/dashboard/essay', status: 'coming-soon', color: '#4A9EFF' },
   { icon: '🎤', title: 'Interview Prep', desc: '500+ MMI prompts with AI evaluation', href: '/dashboard/interview', status: 'coming-soon', color: '#FF6B8A' },
-  { icon: '🤖', title: 'AI Tutor', desc: 'Ask anything dental — powered by Gemini', href: '/dashboard/ai', status: 'coming-soon', color: '#A78BFA' },
   { icon: '💬', title: 'Community', desc: 'Forums, mentors, and study partners', href: '/dashboard/community', status: 'coming-soon', color: '#F0C060' },
 ]
 
 const dentalStudentModules = [
   { icon: '🦷', title: 'Clinical Tracker', desc: 'Log procedures and track graduation requirements', href: '/dashboard/clinical', status: 'coming-soon', color: '#00C9A7' },
   { icon: '📚', title: 'Board Prep', desc: 'INBDE question bank with AI explanations', href: '/dashboard/boards', status: 'coming-soon', color: '#F0C060' },
-  { icon: '🤖', title: 'AI Tutor', desc: 'Pharmacology, oral path, perio, endo and more', href: '/dashboard/ai', status: 'coming-soon', color: '#4A9EFF' },
-  { icon: '🔬', title: 'Anatomy Tools', desc: '3D tooth viewer, numbering quiz, radiographs', href: '/dashboard/anatomy', status: 'coming-soon', color: '#FF6B8A' },
+ { icon: '🔬', title: 'Anatomy Tools', desc: '3D tooth viewer, numbering quiz, radiographs', href: '/dashboard/anatomy', status: 'coming-soon', color: '#FF6B8A' },
   { icon: '💬', title: 'Community', desc: 'Forums, mentors, and study partners', href: '/dashboard/community', status: 'coming-soon', color: '#A78BFA' },
   { icon: '🏆', title: 'Career Planner', desc: 'Specialties, residency, salary explorer', href: '/dashboard/career', status: 'coming-soon', color: '#F0C060' },
 ]
