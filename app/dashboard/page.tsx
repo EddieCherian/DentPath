@@ -1,7 +1,10 @@
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { cookies } } from 'next/headers'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+
+// ADD THIS LINE - tells Next.js to render dynamically
+export const dynamic = 'force-dynamic'
 
 const preDentalModules = [
   { icon: '📊', title: 'DAT Prep', desc: 'AI-generated questions, mock exams, flashcards', href: '/dashboard/dat', status: 'active', color: '#00C9A7' },
